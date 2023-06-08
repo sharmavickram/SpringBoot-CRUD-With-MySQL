@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-mysql-deployment
+spec:
+  selector:
+    matchLabels:
+      app: springboot-k8s-mysql
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: springboot-k8s-mysql
+    spec:
+      containers:
+        - name: springboot-crud-k8s
+          image: gcr.io/sprinboot-k8s/vikram-springboot-crud:v2
+          ports:
+            - containerPort: 8080
+          env:   # Setting Enviornmental Variables
+            - name: MYSQL_ROOT_HOST   # Setting Database host address from configMap
+              value : 34.131.92.53
+
+            - name: MYSQL_DATABASE  # Setting Database name from configMap
+              value : sampledb
+
+
+            - name: MYSQL_ROOT_USERNAME  # Setting Database username from Secret
+              value : root
+
+
+            - name: MYSQL_ROOT_PASSWORD # Setting Database password from Secret
+              value : root
+
+
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: springboot-crud-svc
+spec:
+  selector:
+    app: springboot-k8s-mysql
+  ports:
+    - protocol: "TCP"
+      port: 18080 # The port that the service is running on in the cluster
+      targetPort: 18080 # The port exposed by the service
+  type: LoadBalancer # type of the service.
+
